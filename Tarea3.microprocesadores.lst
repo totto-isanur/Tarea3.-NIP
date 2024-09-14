@@ -1,0 +1,197 @@
+---------------------------------------------
+OSHONSOFT Z80 ASSEMBLER LISTING
+Line   Addr Opcode      Label   Instruction
+---------------------------------------------
+0001   0000             ;Author: Israel Hernandez Alvarez
+0002   0000             ;comparador de nip
+0003   0000             
+0004   0000             ;inicio de codigo ensamblador
+0005   0000             
+0006   0000             	.org 0000h
+0007   0000 3E 89       	ld a,89h
+0008   0002 D3 03       	out (CW), a
+0009   0004 31 FF 27    	ld SP,27ffh
+0010   0007             
+0011   0007 21 00 20    	ld hl, text1
+0012   000A CD 3E 00    	call disp_text
+0013   000D CD 1D 00    	call read_password
+0014   0010 CD 57 00    	call com_nip
+0015   0013             
+0016   0013             
+0017   0013 76          	halt
+0018   0014             ;llamado a subrutinas
+0019   0014             subr:
+0020   0014 CD 1D 00    	call read_password
+0021   0017 CD 4B 00    	call repeat2
+0022   001A CD 91 00    	call mintent
+0023   001D             
+0024   001D             read_password:
+0025   001D 21 62 20    	ld hl,passw
+0026   0020 06 04       	ld b,4
+0027   0022             
+0028   0022             read_other:
+0029   0022             
+0030   0022 DB 01               in a,(KEYB)
+0031   0024 FE 1D               cp 29
+0032   0026 F2 2A 00            jp P, M1
+0033   0029 76                  halt
+0034   002A             M1:
+0035   002A FE 39       	cp 39h
+0036   002C F2 30 00    	jp p, M2
+0037   002F             	;jr error
+0038   002F             ;	ret
+0039   002F 76          	halt
+0040   0030             M2:
+0041   0030 FE 30       	cp 30h
+0042   0032 DA 22 00    	jp C, read_other
+0043   0035             
+0044   0035 77          	ld (hl),a
+0045   0036 23          	inc hl
+0046   0037 3E 2A       	ld a, "*"
+0047   0039 D3 00       	out (LCD), a
+0048   003B             
+0049   003B 10 E5               djnz read_other
+0050   003D C9                  ret
+0051   003E             
+0052   003E             
+0053   003E             ;subrutinas
+0054   003E             
+0055   003E             disp_text:
+0056   003E             repeat1:
+0057   003E 7E          	ld a,(hl)
+0058   003F FE 26       	cp "&"
+0059   0041 CA 4A 00    	jp z,end_sub1
+0060   0044 D3 00       	out (LCD),a
+0061   0046 23          	inc hl
+0062   0047 C3 3E 00    	jp repeat1
+0063   004A             
+0064   004A             end_sub1:
+0065   004A C9          	ret
+0066   004B             
+0067   004B             
+0068   004B             
+0069   004B             
+0070   004B             
+0071   004B             repeat2:
+0072   004B 7E          	ld a, (hl)
+0073   004C FE 26        	cp "&"
+0074   004E CA 1D 00    	jp z, read_password
+0075   0051 D3 00       	out (LCD), a
+0076   0053 23          	inc hl
+0077   0054 C3 4B 00    	jp repeat2
+0078   0057             
+0079   0057             
+0080   0057             ;comparacion de nip
+0081   0057             com_nip:
+0082   0057 21 62 20    	ld hl, passw
+0083   005A 11 5E 20    	ld de, pattern
+0084   005D 06 04       	ld b, 4 ;por que son 4 digitos
+0085   005F             
+0086   005F             com_cicl:
+0087   005F 4E          	ld c, (hl)
+0088   0060 1A          	ld a, (de)
+0089   0061 B9          	cp c
+0090   0062 C2 78 00    	jp nz, nip_err
+0091   0065 13          	inc de
+0092   0066 23          	inc hl
+0093   0067 10 F6       	djnz  com_cicl
+0094   0069             
+0095   0069 21 1A 20    	ld hl, corr_nip
+0096   006C             
+0097   006C             repeat3:
+0098   006C 7E          	ld a, (hl)
+0099   006D FE 26        	cp "&"
+0100   006F CA A0 00    	jp z, fin
+0101   0072 D3 00       	out (LCD), a
+0102   0074 23          	inc hl
+0103   0075 C3 6C 00    	jp repeat3
+0104   0078             
+0105   0078             
+0106   0078             
+0107   0078             ;nip_corr: (probar)
+0108   0078             	;ld hl,corr_nip
+0109   0078             	;ld a,(hl)
+0110   0078             
+0111   0078             	;call disp_text
+0112   0078             	;jp fin
+0113   0078             
+0114   0078             nip_err:
+0115   0078 21 2E 20    	ld hl, err_nip
+0116   007B             	;ld de, CW
+0117   007B 1A          	ld a,(de)
+0118   007C 3D          	dec a
+0119   007D 12          	ld (de),a
+0120   007E FE 00       	cp 0
+0121   0080 C2 84 00    	jp nz, error
+0122   0083 C9          	ret
+0123   0084             
+0124   0084             error:
+0125   0084 7E          	ld a,(hl)
+0126   0085 FE 26       	cp "&"
+0127   0087 CA 14 00    	jp z, subr
+0128   008A D3 00       	out (LCD), a
+0129   008C 23          	inc hl
+0130   008D C3 84 00    	jp error
+0131   0090             
+0132   0090 76          	halt
+0133   0091             
+0134   0091             
+0135   0091             mintent:
+0136   0091 21 2E 20    	ld hl, err_nip
+0137   0094             
+0138   0094             repeat4:
+0139   0094 7E          	ld a, (hl)
+0140   0095 FE 26        	cp "&"
+0141   0097 CA A0 00    	jp z, fin
+0142   009A D3 00       	out (LCD), a
+0143   009C 23          	inc hl
+0144   009D C3 94 00    	jp repeat4
+0145   00A0             
+0146   00A0             
+0147   00A0             
+0148   00A0             fin:
+0149   00A0 76          	halt
+0150   00A1             
+0151   00A1             ;fin de comparacion de nip(quitar)
+0152   00A1             
+0153   00A1             ;memoria
+0154   00A1             	.org 2000h
+0155   2000 4E 49 50 3A text1:	.db "NIP: &"
+0155   2004 20 26       
+0156   2006             
+0157   2006             
+0158   2006 64 65 6D 61 text_equivocado: .db "demaciados intentos&"
+0158   200A 63 69 61 64 
+0158   200E 6F 73 20 69 
+0158   2012 6E 74 65 6E 
+0158   2016 74 6F 73 26 
+0159   201A 65 6C 20 6E corr_nip: .db "el nip es correcto &"
+0159   201E 69 70 20 65 
+0159   2022 73 20 63 6F 
+0159   2026 72 72 65 63 
+0159   202A 74 6F 20 26 
+0160   202E 65 6C 20 6E err_nip: .db "el nip ingresado es erroneo, intente nuevamente&"
+0160   2032 69 70 20 69 
+0160   2036 6E 67 72 65 
+0160   203A 73 61 64 6F 
+0160   203E 20 65 73 20 
+0160   2042 65 72 72 6F 
+0160   2046 6E 65 6F 2C 
+0160   204A 20 69 6E 74 
+0160   204E 65 6E 74 65 
+0160   2052 20 6E 75 65 
+0160   2056 76 61 6D 65 
+0160   205A 6E 74 65 26 
+0161   205E             
+0162   205E 31 32 33 34 pattern: .db "1234"
+0163   2062 00 00 00 00 passw:	.db 00h,00h,00h,00h
+0164   2066             
+0165   2066             
+0166   2066             ;constantes
+0167   2066             LCD:	.equ 00h
+0168   2066             KEYB:	.equ 01h
+0169   2066             CW	.equ 03h
+0170   2066             
+0171   2066             
+0172   2066             	.end
+Number of errors = 0
